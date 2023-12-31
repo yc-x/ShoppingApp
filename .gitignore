@@ -34,3 +34,6 @@ build/
 
 ### properties file ###
 *.properties
+
+### OS Generated files ###
+.DS_Store
