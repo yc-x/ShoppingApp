@@ -32,7 +32,7 @@ public class QuizUser {
     @Column(name="is_active")
     private boolean isActive;
 
-    //@JsonIgnore
+    @JsonIgnore
     @OneToMany(mappedBy = "quizUser", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Quiz> quizList;
 }

@@ -81,6 +81,7 @@ public class QuizUserController {
         return DataResponse.builder()
                 .success(true)
                 .message("Successfully update user active status to: " + isActive)
+                .data(quizUserService.findQuizUserById(userId))
                 .build();
     }
 
