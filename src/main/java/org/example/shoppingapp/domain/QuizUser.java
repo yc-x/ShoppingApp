@@ -1,5 +1,7 @@
 package org.example.shoppingapp.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import javax.persistence.*;
@@ -30,6 +32,7 @@ public class QuizUser {
     @Column(name="is_active")
     private boolean isActive;
 
+    //@JsonIgnore
     @OneToMany(mappedBy = "quizUser", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Quiz> quizList;
 }

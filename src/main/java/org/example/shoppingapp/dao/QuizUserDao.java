@@ -1,5 +1,7 @@
 package org.example.shoppingapp.dao;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.example.shoppingapp.domain.Quiz;
 import org.example.shoppingapp.domain.QuizUser;
 import org.hibernate.Session;
 import org.springframework.stereotype.Repository;
@@ -37,5 +39,12 @@ public class QuizUserDao extends AbstractHibernateDao<QuizUser>{
         //currentSession.update(quizUser);
         //currentSession.evict(quizUser);
         //currentSession.flush();
+    }
+
+
+    public List<Quiz> getUserQuizzesById(int quizUserId){
+        // Session currentSession = this.sessionFactory.getCurrentSession();
+        QuizUser quizUser = findQuizUserById(quizUserId);
+        return quizUser.getQuizList();
     }
 }

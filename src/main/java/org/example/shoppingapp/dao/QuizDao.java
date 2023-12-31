@@ -1,6 +1,7 @@
 package org.example.shoppingapp.dao;
 
 import org.example.shoppingapp.domain.Quiz;
+import org.hibernate.Session;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -22,5 +23,6 @@ public class QuizDao extends AbstractHibernateDao<Quiz> {
     public void addQuiz(Quiz item) {
         this.add(item);
     }
+
 }
 

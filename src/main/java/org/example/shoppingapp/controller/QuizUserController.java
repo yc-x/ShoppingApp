@@ -83,4 +83,13 @@ public class QuizUserController {
                 .message("Successfully update user active status to: " + isActive)
                 .build();
     }
+
+    @GetMapping("/quiz")
+    public DataResponse getUserQuizzesById(@RequestParam(name="userId") int userId){
+        return DataResponse.builder()
+                .data(quizUserService.getUserQuizzesById(userId))
+                .success(true)
+                .message("Successfully get user quizzes")
+                .build();
+    }
 }
