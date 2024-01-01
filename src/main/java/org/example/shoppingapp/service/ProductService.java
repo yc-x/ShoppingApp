@@ -19,7 +19,12 @@ public class ProductService {
     }
 
     @Transactional
-    public Product getProductById(long productId){
+    public Product getProductById(Long productId){
         return productDao.getProductById(productId);
+    }
+
+    @Transactional
+    public void createProduct(Product product){
+        productDao.addProduct(product);
     }
 }

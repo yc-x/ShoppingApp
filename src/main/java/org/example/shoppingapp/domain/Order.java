@@ -17,7 +17,7 @@ public class Order {
     @Column(name="order_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    private long id;
+    private Long id;
 
     @Column(name="date_placed")
     private Date datePlaced;

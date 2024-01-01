@@ -20,14 +20,14 @@ public class User {
     @Column(name="user_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    private long id;
+    private Long id;
 
     @Column
     private String email;
     @Column(name="u_password")
     private String password;
     @Column
-    private int role;
+    private Integer role;
     @Column
     private String username;
 

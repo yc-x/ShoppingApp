@@ -15,7 +15,7 @@ public class ProductDao extends AbstractHibernateDao<Product>{
         return this.getAll();
     }
 
-    public Product getProductById(long id) {
+    public Product getProductById(Long id) {
         return this.findById(id);
     }
 

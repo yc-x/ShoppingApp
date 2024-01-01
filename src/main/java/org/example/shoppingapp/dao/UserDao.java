@@ -16,7 +16,7 @@ public class UserDao extends AbstractHibernateDao<User>{
         return this.getAll();
     }
 
-    public User findUserById(long userId) {
+    public User findUserById(Long userId) {
         return this.findById(userId);
     }
 

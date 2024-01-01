@@ -16,14 +16,14 @@ public class OrderItem {
     @Column(name="item_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    private long id;
+    private Long id;
 
     @Column(name="purchased_price")
-    private double purchasedPrice;
+    private Double purchasedPrice;
     @Column
-    private int quantity;
+    private Integer quantity;
     @Column(name="wholesale_price")
-    private double wholesalePrice;
+    private Double wholesalePrice;
 
     @ManyToOne
     @JoinColumn(name="order_id")

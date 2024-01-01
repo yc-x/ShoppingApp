@@ -25,11 +25,11 @@ public class Product {
     @Column(name="p_name")
     private String name;
     @Column
-    private int quantity;
+    private Integer quantity;
     @Column(name="retail_price")
-    private double retailPrice;
+    private Double retailPrice;
     @Column(name="wholesale_price")
-    private double wholesalePrice;
+    private Double wholesalePrice;
 
     @ManyToMany(mappedBy = "products", fetch = FetchType.EAGER)
     private Set<User> users; //= new HashSet<User>();

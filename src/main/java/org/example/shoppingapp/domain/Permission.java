@@ -16,7 +16,7 @@ public class Permission {
     @Column(name="permission_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    private long id;
+    private Long id;
 
     @Column(name="p_value")
     private String value;
