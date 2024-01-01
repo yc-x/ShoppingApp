@@ -17,4 +17,9 @@ public class UserService {
         userDao.addUser(user);
     }
 
+    @Transactional
+    public User getUserById(Long userId){
+        return userDao.findUserById(userId);
+    }
+
 }

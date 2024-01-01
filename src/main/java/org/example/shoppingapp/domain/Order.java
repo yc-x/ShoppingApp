@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.sql.Date;
+import java.sql.Timestamp;
 
 @Entity
 @Getter
@@ -20,7 +21,7 @@ public class Order {
     private Long id;
 
     @Column(name="date_placed")
-    private Date datePlaced;
+    private Timestamp datePlaced;
     @Column(name="order_status")
     private String orderStatus;
 

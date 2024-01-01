@@ -50,7 +50,7 @@ public class UserController {
                 .append(error.getDefaultMessage())
                 .append("\n"));
         return DataResponse.getGeneralInvalidResponse(errorMessage.toString(),
-                "Product request not in correct format, please check your request.");
+                "User request not in correct format, please check your request.");
     }
 
 }
