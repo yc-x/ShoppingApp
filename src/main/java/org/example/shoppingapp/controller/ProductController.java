@@ -119,11 +119,8 @@ public class ProductController {
                 .append(": ")
                 .append(error.getDefaultMessage())
                 .append("\n"));
-        return DataResponse.builder()
-                .data(errorMessage)
-                .success(false)
-                .message("Not in Correct format, please check your request.")
-                .build();
+        return DataResponse.getGeneralInvalidResponse(errorMessage.toString(),
+                "Product request not in correct format, please check your request.");
     }
 
 }

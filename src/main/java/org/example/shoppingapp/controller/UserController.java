@@ -28,16 +28,7 @@ public class UserController {
                                    BindingResult bindingResult){
         if(bindingResult.hasErrors()){
             List<FieldError> errors = bindingResult.getFieldErrors();
-            StringBuilder errorMessage = new StringBuilder();
-            errors.forEach(error -> errorMessage.append(error.getObjectName())
-                    .append(": ")
-                    .append(error.getDefaultMessage())
-                    .append("\n"));
-            return DataResponse.builder()
-                    .data(errorMessage.toString())
-                    .success(false)
-                    .message("Not in Correct format, please check your request.")
-                    .build();
+            return buildErrorContent(errors);
         }
         userService.createUser(
                 User.builder()
@@ -50,6 +41,16 @@ public class UserController {
                 .success(true)
                 .message("User Created")
                 .build();
+    }
+
+    private DataResponse buildErrorContent(List<FieldError> errors){
+        StringBuilder errorMessage = new StringBuilder();
+        errors.forEach(error -> errorMessage.append(error.getObjectName())
+                .append(": ")
+                .append(error.getDefaultMessage())
+                .append("\n"));
+        return DataResponse.getGeneralInvalidResponse(errorMessage.toString(),
+                "Product request not in correct format, please check your request.");
     }
 
 }
