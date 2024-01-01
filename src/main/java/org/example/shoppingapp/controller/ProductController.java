@@ -19,6 +19,7 @@ public class ProductController {
     @GetMapping("/all")
     @ResponseBody
     public DataResponse getAllProducts(){
+        //TODO: return different products information decided by user's role.
         List<ProductResponse> responseList = productService.getAllProducts().stream().
                 map(p -> ProductResponse.builder()
                         .name(p.getName())
