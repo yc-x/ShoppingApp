@@ -27,16 +27,7 @@ public class ProductController {
         // TODO: Add admin user role check before this operation.
         if(bindingResult.hasErrors()){
             List<FieldError> errors = bindingResult.getFieldErrors();
-            StringBuilder errorMessage = new StringBuilder();
-            errors.forEach(error -> errorMessage.append(error.getObjectName())
-                    .append(": ")
-                    .append(error.getDefaultMessage())
-                    .append("\n"));
-            return DataResponse.builder()
-                    .data(errorMessage.toString())
-                    .success(false)
-                    .message("Not in Correct format, please check your request.")
-                    .build();
+            return buildErrorContent(errors);
         }
         Product newProduct = Product.builder()
                 .name(productRequest.getName())
@@ -96,10 +87,43 @@ public class ProductController {
                 .build();
     }
 
-//    @PatchMapping("/{productId}")
-//    @ResponseBody
-//    public DataResponse modifyProductById(@Valid @RequestBody ProductRequest productRequest){
-//        // TODO: apply change product information.
-//    }
+    @PatchMapping("/{productId}")
+    @ResponseBody
+    public DataResponse modifyProductById(@Valid @RequestBody ProductRequest productRequest,
+    @PathVariable Long productId,
+    BindingResult bindingResult){
+        // TODO: check whether those options are optional?
+        if(bindingResult.hasErrors()){
+            List<FieldError> errors = bindingResult.getFieldErrors();
+            return buildErrorContent(errors);
+        }
+        Product product = productService.getProductById(productId);
+        if(product == null){
+            return DataResponse.builder()
+                    .success(false)
+                    .message("The product id doesn't exist!")
+                    .build();
+        }
+        productService.updateProductById(productRequest, product.getId());
+        return DataResponse.builder()
+                .success(true)
+                .message("Product updated!")
+                .data(productService.getProductById(productId))
+                .build();
+    }
+
+
+    private DataResponse buildErrorContent(List<FieldError> errors){
+        StringBuilder errorMessage = new StringBuilder();
+        errors.forEach(error -> errorMessage.append(error.getObjectName())
+                .append(": ")
+                .append(error.getDefaultMessage())
+                .append("\n"));
+        return DataResponse.builder()
+                .data(errorMessage)
+                .success(false)
+                .message("Not in Correct format, please check your request.")
+                .build();
+    }
 
 }
