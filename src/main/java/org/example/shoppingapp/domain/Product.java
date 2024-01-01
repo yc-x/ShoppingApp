@@ -31,6 +31,6 @@ public class Product {
     @Column(name="wholesale_price")
     private double wholesalePrice;
 
-    @ManyToMany(mappedBy = "products")
+    @ManyToMany(mappedBy = "products", fetch = FetchType.EAGER)
     private Set<User> users; //= new HashSet<User>();
 }
