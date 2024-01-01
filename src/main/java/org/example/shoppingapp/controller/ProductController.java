@@ -52,6 +52,7 @@ public class ProductController {
                 .build();
     }
 
+
     @GetMapping("/all")
     @ResponseBody
     public DataResponse getAllProducts(){
@@ -73,6 +74,7 @@ public class ProductController {
     }
 
     @GetMapping("/{productId}")
+    @ResponseBody
     public DataResponse getProductById(@PathVariable long productId){
         Product product = productService.getProductById(productId);
         if(product != null){
@@ -93,5 +95,11 @@ public class ProductController {
                 .success(false)
                 .build();
     }
+
+//    @PatchMapping("/{productId}")
+//    @ResponseBody
+//    public DataResponse modifyProductById(@Valid @RequestBody ProductRequest productRequest){
+//        // TODO: apply change product information.
+//    }
 
 }
