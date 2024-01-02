@@ -44,6 +44,6 @@ public class User {
     @JoinTable(name="watchlist",
             joinColumns = {@JoinColumn(name="user_id")},
             inverseJoinColumns = {@JoinColumn(name="product_id")} )
-    private Set<Product> products; // = new HashSet<Product>();
+    private Set<Product> watchlistProducts; // = new HashSet<Product>();
 
 }
