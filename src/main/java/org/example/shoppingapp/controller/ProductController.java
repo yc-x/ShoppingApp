@@ -48,8 +48,10 @@ public class ProductController {
     @ResponseBody
     public DataResponse getAllProducts(){
         //TODO: return different products information decided by user's role.
-        List<ProductResponse> responseList = productService.getAllProducts().stream().
-                map(p -> ProductResponse.builder()
+        List<ProductResponse> responseList = productService.getAllProducts().stream()
+                .filter(p -> p.getQuantity() > 0)
+                // TODO: showcase is different between admin and user
+                .map(p -> ProductResponse.builder()
                         .name(p.getName())
                         .description(p.getDescription())
                         .retailPrice(p.getRetailPrice())

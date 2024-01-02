@@ -33,4 +33,9 @@ public class ProductService {
     public void updateProductById(ProductRequest productInfo, Long productId){
         productDao.updateProductById(productInfo, productId);
     }
+
+//    @Transactional
+//    public void updateProductQuantityById(Long productId, int change){
+//        productDao.updateProductQuantityById(productId, change);
+//    }
 }

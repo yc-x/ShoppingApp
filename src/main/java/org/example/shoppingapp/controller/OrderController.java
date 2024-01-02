@@ -12,6 +12,7 @@ import org.example.shoppingapp.dto.order.SingleOrderRequest;
 import org.example.shoppingapp.service.OrderService;
 import org.example.shoppingapp.service.ProductService;
 import org.example.shoppingapp.service.UserService;
+import org.hibernate.Hibernate;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -33,8 +34,29 @@ public class OrderController {
 
     @GetMapping("/all")
     public DataResponse getAllOrders(){
-        // TODO: build orders.
+        // TODO: add different handle method for current user and admin
+
+        List<Order> orders = orderService.getAllOrders();
         return DataResponse.builder()
+                .message("Successfully get all orders")
+                .success(true)
+                .data(orders)
+                .build();
+    }
+
+    @GetMapping("/{orderId}")
+    public DataResponse getOrderById(@PathVariable Long orderId){
+        Order order = orderService.getOrderById(orderId);
+        if(order == null){
+            return DataResponse.builder()
+                    .success(false)
+                    .message("Order id doesn't exist!")
+                    .build();
+        }
+        return DataResponse.builder()
+                .success(true)
+                .message("Successfully get an order")
+                .data(order)
                 .build();
     }
 
@@ -48,6 +70,7 @@ public class OrderController {
         }
         User dummyUser = userService.getUserById(2L);
         // TODO: replace this user with current user.
+        // TODO: check order num is greater than product stock or not.
         List<SingleOrderRequest> orderRequestList = orderRequest.getOrderRequests();
         Order newOrder = Order.builder()
                 .datePlaced(Timestamp.valueOf(LocalDateTime.now()))

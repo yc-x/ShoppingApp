@@ -46,4 +46,11 @@ public class ProductDao extends AbstractHibernateDao<Product>{
 
         currentSession.update(product);
     }
+
+    public void updateProductQuantityById(Long productId, int change){
+        Session currentSession = this.getCurrentSession();
+        Product product = this.getProductById(productId);
+        product.setQuantity(product.getQuantity() + change);
+        currentSession.update(product);
+    }
 }

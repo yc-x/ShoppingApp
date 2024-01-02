@@ -39,9 +39,11 @@ public class User {
     @OneToMany(mappedBy = "user", /*fetch = FetchType.EAGER,*/ cascade = CascadeType.ALL)
     private List<Order> orders;
 
+    @JsonIgnore
     @ManyToMany
     @JoinTable(name="watchlist",
             joinColumns = {@JoinColumn(name="user_id")},
             inverseJoinColumns = {@JoinColumn(name="product_id")} )
     private Set<Product> products; // = new HashSet<Product>();
+
 }
