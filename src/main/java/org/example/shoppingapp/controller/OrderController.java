@@ -72,6 +72,14 @@ public class OrderController {
         // TODO: replace this user with current user.
         // TODO: check order num is greater than product stock or not.
         List<SingleOrderRequest> orderRequestList = orderRequest.getOrderRequests();
+        boolean areItemsEnough = orderRequestList.stream()
+                .allMatch(this::isEnough);
+        if(!areItemsEnough){
+            return DataResponse.builder()
+                    .success(false)
+                    .message("One of the items in your order stocking is not enough!")
+                    .build();
+        }
         Order newOrder = Order.builder()
                 .datePlaced(Timestamp.valueOf(LocalDateTime.now()))
                 .user(dummyUser)
@@ -96,6 +104,11 @@ public class OrderController {
                 .append("\n"));
         return DataResponse.getGeneralInvalidResponse(errorMessage.toString(),
                 "Order request not in correct format, please check your request.");
+    }
+
+    private boolean isEnough(SingleOrderRequest singleOrderRequest){
+        Product product = productService.getProductById(singleOrderRequest.getProductId());
+        return singleOrderRequest.getQuantity() <= product.getQuantity();
     }
 
     private OrderItem convertToOrderItem(SingleOrderRequest singleOrderRequest, Order order){
