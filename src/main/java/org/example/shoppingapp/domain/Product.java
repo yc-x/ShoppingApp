@@ -1,5 +1,6 @@
 package org.example.shoppingapp.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
@@ -31,6 +32,7 @@ public class Product {
     @Column(name="wholesale_price")
     private Double wholesalePrice;
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "watchlistProducts", fetch = FetchType.EAGER)
     private Set<User> users; //= new HashSet<User>();
 }

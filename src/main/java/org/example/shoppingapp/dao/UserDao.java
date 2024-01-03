@@ -9,6 +9,9 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Root;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -25,7 +28,7 @@ public class UserDao extends AbstractHibernateDao<User>{
         return this.getAll();
     }
 
-    public User findUserById(Long userId) {
+    public User getUserById(Long userId) {
         return this.findById(userId);
     }
 
@@ -33,12 +36,20 @@ public class UserDao extends AbstractHibernateDao<User>{
         this.add(item);
     }
 
-    public List<Product> getWatchlistProductsByUserId(Long userId){
+    public Set<Product> getWatchlistProductsByUserId(Long userId){
         Session currentSession = this.getCurrentSession();
         String queryString = "select p from Product p join p.users u where u.id=:userId";
-        Query query = currentSession.createQuery(queryString);
-        query.setParameter("userId", userId);
-        return (List<Product>) query.list();
+        List<Product> result = currentSession.createQuery(queryString, Product.class)
+                .setParameter("userId", userId)
+                .list();
+        return new HashSet<>(result);
+
+//        CriteriaBuilder cb = currentSession.getCriteriaBuilder();
+//        CriteriaQuery<Product> cq = cb.createQuery(Product.class);
+//        Root<Product> productRoot = cq.from(Product.class);
+//        // productRoot.join("user_table", JoinType.INNER);
+
+
         // why?
         // User user = this.findUserById(userId);
         // System.out.println(getCurrentSession().contains(user));
