@@ -1,4 +1,4 @@
 package org.example.shoppingapp.exception;
 
-public class InvalidCredentialsException {
+public class NotEnoughInventoryException {
 }

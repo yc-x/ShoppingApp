@@ -2,17 +2,19 @@ package org.example.shoppingapp.controller;
 
 
 import lombok.RequiredArgsConstructor;
-import org.example.shoppingapp.domain.Order;
-import org.example.shoppingapp.domain.OrderItem;
-import org.example.shoppingapp.domain.Product;
-import org.example.shoppingapp.domain.User;
+import org.example.shoppingapp.domain.*;
 import org.example.shoppingapp.dto.common.DataResponse;
 import org.example.shoppingapp.dto.order.OrderRequest;
+import org.example.shoppingapp.dto.order.OrderResponse;
 import org.example.shoppingapp.dto.order.SingleOrderRequest;
+import org.example.shoppingapp.security.AuthUserDetail;
 import org.example.shoppingapp.service.OrderService;
 import org.example.shoppingapp.service.ProductService;
 import org.example.shoppingapp.service.UserService;
 import org.hibernate.Hibernate;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +23,9 @@ import javax.validation.Valid;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -32,20 +36,58 @@ public class OrderController {
     private final UserService userService;
     private final ProductService productService;
 
-    @GetMapping("/all")
-    public DataResponse getAllOrders(){
-        // TODO: add different handle method for current user and admin
+    private Set<String> getAuthUserAuthorities(){
+        return  SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toSet());
+    }
 
-        List<Order> orders = orderService.getAllOrders();
+    @GetMapping("/all")
+//    @PreAuthorize("hasAuthority('Admin')")
+    public DataResponse getAllOrders(){
+        List<Order> orders;
+        if(!getAuthUserAuthorities().contains("Admin")){
+            Long currentUserId = Long.valueOf(SecurityContextHolder.getContext()
+                    .getAuthentication().getName());
+            orders = orderService.getOrdersByUserId(currentUserId);
+        }
+        else{
+            orders = orderService.getAllOrders();
+        }
+
+        List<OrderResponse> orderResponses = orders.stream()
+                .map(order -> OrderResponse.builder()
+                        .orderId(order.getId())
+                        .datePlaced(order.getDatePlaced())
+                        .status(order.getOrderStatus())
+                        .orderItemDetails(
+                            orderService.getOrderItemDetailByOrderId(order.getId())
+                                    .stream()
+                                    .map(OrderItemDetail::buildOrderItemDetailFromOrderItem)
+                                    .collect(Collectors.toList())
+                        )
+                        .build())
+                .collect(Collectors.toList());
         return DataResponse.builder()
                 .message("Successfully get all orders")
                 .success(true)
-                .data(orders)
+                .data(orderResponses)
                 .build();
     }
 
     @GetMapping("/{orderId}")
     public DataResponse getOrderById(@PathVariable Long orderId){
+        if(!getAuthUserAuthorities().contains("Admin")){
+            Set<Long> orderIdSet = getOrderIdsForCurrentUser();
+            if(!orderIdSet.contains(orderId)){
+                return DataResponse.builder()
+                        .success(false)
+                        .message("This order is not placed by you!")
+                        .build();
+            }
+        }
         Order order = orderService.getOrderById(orderId);
         if(order == null){
             return DataResponse.builder()
@@ -53,10 +95,20 @@ public class OrderController {
                     .message("Order id doesn't exist!")
                     .build();
         }
+        List<OrderItemDetail> orderItemDetails = orderService.getOrderItemDetailByOrderId(orderId)
+                .stream().map(OrderItemDetail::buildOrderItemDetailFromOrderItem)
+                .collect(Collectors.toList());
+        OrderResponse orderResponse = OrderResponse.builder()
+                .orderId(order.getId())
+                .datePlaced(order.getDatePlaced())
+                .orderItemDetails(orderItemDetails)
+                .status(order.getOrderStatus())
+                .build();
+
         return DataResponse.builder()
                 .success(true)
                 .message("Successfully get an order")
-                .data(order)
+                .data(orderResponse)
                 .build();
     }
 
@@ -68,9 +120,10 @@ public class OrderController {
             List<FieldError> errors = bindingResult.getFieldErrors();
             return buildErrorContent(errors);
         }
-        User dummyUser = userService.getUserById(2L);
-        // TODO: replace this user with current user.
-        // TODO: check order num is greater than product stock or not.
+        String userIdStr = SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        Long userId = Long.valueOf(userIdStr);
+        User currentUser = userService.getUserById(userId);
         List<SingleOrderRequest> orderRequestList = orderRequest.getOrderRequests();
         boolean areItemsEnough = orderRequestList.stream()
                 .allMatch(this::isEnough);
@@ -82,7 +135,7 @@ public class OrderController {
         }
         Order newOrder = Order.builder()
                 .datePlaced(Timestamp.valueOf(LocalDateTime.now()))
-                .user(dummyUser)
+                .user(currentUser)
                 .orderStatus("Processing")
                 .build();
         List<OrderItem> orderItems = orderRequestList.stream()
@@ -94,6 +147,38 @@ public class OrderController {
                 .success(true)
                 .message("Order created")
                 .build();
+    }
+
+    @PatchMapping("/{orderId}/cancel")
+    public DataResponse cancelOrder(@PathVariable Long orderId){
+        Set<Long> orderIdSet = getOrderIdsForCurrentUser();
+        if(!orderIdSet.contains(orderId)){
+            return DataResponse.builder()
+                    .success(false)
+                    .message("This order is not placed by you!")
+                    .build();
+        }
+        Order order = orderService.getOrderById(orderId);
+        if(!order.getOrderStatus().equals("Processing")){
+            return DataResponse.builder()
+                    .success(false)
+                    .message("This order is not under processing")
+                    .build();
+        }
+        orderService.cancelOrderById(orderId);
+        return DataResponse.builder()
+                .success(true)
+                .message("The order " + orderId + " has been canceled!")
+                .build();
+    }
+
+
+    private Set<Long> getOrderIdsForCurrentUser(){
+        Long currentUserId = Long.valueOf(SecurityContextHolder.getContext()
+                .getAuthentication().getName());
+        return orderService.getOrdersByUserId(currentUserId)
+                .stream().map(Order::getId)
+                .collect(Collectors.toSet());
     }
 
     private DataResponse buildErrorContent(List<FieldError> errors){

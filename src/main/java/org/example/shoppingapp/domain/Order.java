@@ -1,10 +1,12 @@
 package org.example.shoppingapp.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -27,5 +29,9 @@ public class Order {
 
     @ManyToOne
     @JoinColumn(name="user_id")
+    @JsonIgnore
     private User user;
+
+    @OneToMany(mappedBy = "order")
+    private Set<OrderItem> orderItemSet;
 }
