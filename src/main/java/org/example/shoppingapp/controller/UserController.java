@@ -18,39 +18,38 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 public class UserController {
-    private final UserService userService;
-
-
-    //TODO: prevent sign up with same user name and email.
-    @PostMapping("/signup")
-    @ResponseBody
-    public DataResponse createUser(@Valid @RequestBody UserRequest userRequest,
-                                   BindingResult bindingResult){
-        if(bindingResult.hasErrors()){
-            List<FieldError> errors = bindingResult.getFieldErrors();
-            return buildErrorContent(errors);
-        }
-        userService.createUser(
-                User.builder()
-                        .username(userRequest.getUsername())
-                        .email(userRequest.getEmail())
-                        .password(userRequest.getPassword())
-                        .build()
-        );
-        return DataResponse.builder()
-                .success(true)
-                .message("User Created")
-                .build();
-    }
-
-    private DataResponse buildErrorContent(List<FieldError> errors){
-        StringBuilder errorMessage = new StringBuilder();
-        errors.forEach(error -> errorMessage.append(error.getObjectName())
-                .append(": ")
-                .append(error.getDefaultMessage())
-                .append("\n"));
-        return DataResponse.getGeneralInvalidResponse(errorMessage.toString(),
-                "User request not in correct format, please check your request.");
-    }
+//    private final UserService userService;
+//
+//
+//    @PostMapping("/signup")
+//    @ResponseBody
+//    public DataResponse createUser(@Valid @RequestBody UserRequest userRequest,
+//                                   BindingResult bindingResult){
+//        if(bindingResult.hasErrors()){
+//            List<FieldError> errors = bindingResult.getFieldErrors();
+//            return buildErrorContent(errors);
+//        }
+//        userService.createUser(
+//                User.builder()
+//                        .username(userRequest.getUsername())
+//                        .email(userRequest.getEmail())
+//                        .password(userRequest.getPassword())
+//                        .build()
+//        );
+//        return DataResponse.builder()
+//                .success(true)
+//                .message("User Created")
+//                .build();
+//    }
+//
+//    private DataResponse buildErrorContent(List<FieldError> errors){
+//        StringBuilder errorMessage = new StringBuilder();
+//        errors.forEach(error -> errorMessage.append(error.getObjectName())
+//                .append(": ")
+//                .append(error.getDefaultMessage())
+//                .append("\n"));
+//        return DataResponse.getGeneralInvalidResponse(errorMessage.toString(),
+//                "User request not in correct format, please check your request.");
+//    }
 
 }

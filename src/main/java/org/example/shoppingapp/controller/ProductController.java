@@ -54,7 +54,6 @@ public class ProductController {
                 .build();
     }
 
-
     @GetMapping("/all")
     @ResponseBody
     public DataResponse getAllProducts(){
@@ -64,54 +63,30 @@ public class ProductController {
         return getAllProductsForBuyer();
     }
 
-    private DataResponse getAllProductsForBuyer(){
-        List<ProductResponse> responseList = productService.getAllProducts().stream()
-                .filter(p -> p.getQuantity() > 0)
-                .map(p -> ProductResponse.builder()
-                        .name(p.getName())
-                        .description(p.getDescription())
-                        .retailPrice(p.getRetailPrice())
-                        .wholesalePrice(p.getWholesalePrice())
-                        .build()
-                ).collect(Collectors.toList());
-        return DataResponse.builder()
-                .data(responseList)
-                .success(true)
-                .message("Get All products")
-                .build();
-    }
-
-    private DataResponse getAllProductsForAdmin(){
-        List<ProductResponse> responseList = productService.getAllProducts().stream()
-                .map(p -> ProductResponse.builder()
-                        .name(p.getName())
-                        .description(p.getDescription())
-                        .quantity(p.getQuantity())
-                        .retailPrice(p.getRetailPrice())
-                        .wholesalePrice(p.getWholesalePrice())
-                        .build()
-                ).collect(Collectors.toList());
-        return DataResponse.builder()
-                .data(responseList)
-                .success(true)
-                .message("Get All products")
-                .build();
-    }
-
     @GetMapping("/{productId}")
     @ResponseBody
     public DataResponse getProductById(@PathVariable long productId){
         Product product = productService.getProductById(productId);
         if(product != null){
+            if(product.getQuantity() == 0 &&
+                    !getAuthUserAuthorities().contains("Admin")){
+                return DataResponse.builder()
+                        .message("The product you are searching is out of stock!")
+                        .success(true)
+                        .build();
+            }
             ProductResponse productResponse = ProductResponse.builder()
                     .name(product.getName())
                     .description(product.getDescription())
                     .retailPrice(product.getRetailPrice())
                     .wholesalePrice(product.getWholesalePrice())
                     .build();
+            if(getAuthUserAuthorities().contains("Admin")){
+                productResponse.setQuantity(product.getQuantity());
+            }
             return DataResponse.builder()
                     .data(productResponse)
-                    .message("Succesfully get product")
+                    .message("Successfully get product")
                     .success(true)
                     .build();
         }
@@ -147,6 +122,39 @@ public class ProductController {
                 .build();
     }
 
+    private DataResponse getAllProductsForBuyer(){
+        List<ProductResponse> responseList = productService.getAllProducts().stream()
+                .filter(p -> p.getQuantity() > 0)
+                .map(p -> ProductResponse.builder()
+                        .name(p.getName())
+                        .description(p.getDescription())
+                        .retailPrice(p.getRetailPrice())
+                        .wholesalePrice(p.getWholesalePrice())
+                        .build()
+                ).collect(Collectors.toList());
+        return DataResponse.builder()
+                .data(responseList)
+                .success(true)
+                .message("Get All products")
+                .build();
+    }
+
+    private DataResponse getAllProductsForAdmin(){
+        List<ProductResponse> responseList = productService.getAllProducts().stream()
+                .map(p -> ProductResponse.builder()
+                        .name(p.getName())
+                        .description(p.getDescription())
+                        .quantity(p.getQuantity())
+                        .retailPrice(p.getRetailPrice())
+                        .wholesalePrice(p.getWholesalePrice())
+                        .build()
+                ).collect(Collectors.toList());
+        return DataResponse.builder()
+                .data(responseList)
+                .success(true)
+                .message("Get All products")
+                .build();
+    }
 
     private DataResponse buildErrorContent(List<FieldError> errors){
         StringBuilder errorMessage = new StringBuilder();
