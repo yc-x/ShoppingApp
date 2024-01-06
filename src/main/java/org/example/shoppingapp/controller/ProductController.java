@@ -6,12 +6,16 @@ import org.example.shoppingapp.dto.common.DataResponse;
 import org.example.shoppingapp.dto.product.ProductRequest;
 import org.example.shoppingapp.dto.product.ProductResponse;
 import org.example.shoppingapp.service.ProductService;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -20,11 +24,18 @@ import java.util.stream.Collectors;
 public class ProductController {
     private final ProductService productService;
 
+    private Set<String> getAuthUserAuthorities(){
+        return  SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toSet());
+    }
     @PostMapping("")
     @ResponseBody
+    @PreAuthorize("hasAuthority('Admin')")
     public DataResponse createProduct(@Valid @RequestBody ProductRequest productRequest,
                                       BindingResult bindingResult){
-        // TODO: Add admin user role check before this operation.
         if(bindingResult.hasErrors()){
             List<FieldError> errors = bindingResult.getFieldErrors();
             return buildErrorContent(errors);
@@ -47,10 +58,15 @@ public class ProductController {
     @GetMapping("/all")
     @ResponseBody
     public DataResponse getAllProducts(){
-        //TODO: return different products information decided by user's role.
+        if(getAuthUserAuthorities().contains("Admin")){
+            return getAllProductsForAdmin();
+        }
+        return getAllProductsForBuyer();
+    }
+
+    private DataResponse getAllProductsForBuyer(){
         List<ProductResponse> responseList = productService.getAllProducts().stream()
                 .filter(p -> p.getQuantity() > 0)
-                // TODO: showcase is different between admin and user
                 .map(p -> ProductResponse.builder()
                         .name(p.getName())
                         .description(p.getDescription())
@@ -58,7 +74,23 @@ public class ProductController {
                         .wholesalePrice(p.getWholesalePrice())
                         .build()
                 ).collect(Collectors.toList());
+        return DataResponse.builder()
+                .data(responseList)
+                .success(true)
+                .message("Get All products")
+                .build();
+    }
 
+    private DataResponse getAllProductsForAdmin(){
+        List<ProductResponse> responseList = productService.getAllProducts().stream()
+                .map(p -> ProductResponse.builder()
+                        .name(p.getName())
+                        .description(p.getDescription())
+                        .quantity(p.getQuantity())
+                        .retailPrice(p.getRetailPrice())
+                        .wholesalePrice(p.getWholesalePrice())
+                        .build()
+                ).collect(Collectors.toList());
         return DataResponse.builder()
                 .data(responseList)
                 .success(true)
@@ -91,6 +123,7 @@ public class ProductController {
 
     @PatchMapping("/{productId}")
     @ResponseBody
+    @PreAuthorize("hasAuthority('Admin')")
     public DataResponse modifyProductById(@Valid @RequestBody ProductRequest productRequest,
     @PathVariable Long productId,
     BindingResult bindingResult){
@@ -124,5 +157,4 @@ public class ProductController {
         return DataResponse.getGeneralInvalidResponse(errorMessage.toString(),
                 "Product request not in correct format, please check your request.");
     }
-
 }
