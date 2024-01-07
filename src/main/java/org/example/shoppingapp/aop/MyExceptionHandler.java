@@ -11,12 +11,21 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @ControllerAdvice
 //@RestControllerAdvice
 public class MyExceptionHandler {
+
+    @ExceptionHandler(value = {Exception.class})
+    public ResponseEntity<DataResponse> handleException(Exception e){
+        return new ResponseEntity<DataResponse>(DataResponse.builder()
+                .message(e.getMessage())
+                .build(),
+                HttpStatus.OK);
+    }
+
     @ExceptionHandler(value = {NotEnoughInventoryException.class})
     public ResponseEntity<DataResponse> handleDemoNotFoundException(NotEnoughInventoryException e){
-        return new ResponseEntity(DataResponse.builder()
+        return new ResponseEntity<DataResponse>(DataResponse.builder()
                 .message(e.getMessage())
                 .success(false)
                 .build(),
-                HttpStatus.NOT_ACCEPTABLE);
+                HttpStatus.OK);
     }
 }
