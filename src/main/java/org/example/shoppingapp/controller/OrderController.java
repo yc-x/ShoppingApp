@@ -7,6 +7,7 @@ import org.example.shoppingapp.dto.common.DataResponse;
 import org.example.shoppingapp.dto.order.OrderRequest;
 import org.example.shoppingapp.dto.order.OrderResponse;
 import org.example.shoppingapp.dto.order.SingleOrderRequest;
+import org.example.shoppingapp.exception.NotEnoughInventoryException;
 import org.example.shoppingapp.security.AuthUserDetail;
 import org.example.shoppingapp.service.OrderService;
 import org.example.shoppingapp.service.ProductService;
@@ -114,7 +115,9 @@ public class OrderController {
     @PostMapping("")
     @ResponseBody
     public DataResponse createOrders(@RequestBody @Valid OrderRequest orderRequest,
-                                     BindingResult bindingResult){
+                                     BindingResult bindingResult)
+            throws NotEnoughInventoryException
+    {
         if(bindingResult.hasErrors()){
             List<FieldError> errors = bindingResult.getFieldErrors();
             return buildErrorContent(errors);
@@ -127,10 +130,13 @@ public class OrderController {
         boolean areItemsEnough = orderRequestList.stream()
                 .allMatch(this::isEnough);
         if(!areItemsEnough){
-            return DataResponse.builder()
-                    .success(false)
-                    .message("One of the items in your order stocking is not enough!")
-                    .build();
+            throw new NotEnoughInventoryException(
+                    "One of the items in your order stocking is not enough!"
+            );
+//            return DataResponse.builder()
+//                    .success(false)
+//                    .message("One of the items in your order stocking is not enough!")
+//                    .build();
         }
         Order newOrder = Order.builder()
                 .datePlaced(Timestamp.valueOf(LocalDateTime.now()))
