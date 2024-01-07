@@ -48,8 +48,10 @@ public class ProductService {
         return productDao.getTopKRecentProductByUserId(userId, topK);
     }
 
-//    @Transactional
-//    public void updateProductQuantityById(Long productId, int change){
-//        productDao.updateProductQuantityById(productId, change);
-//    }
+
+
+    @Transactional
+    public List<Product> getTopKProfitableProducts(int topK){
+        return productDao.getTopKProfitableProducts(topK);
+    }
 }

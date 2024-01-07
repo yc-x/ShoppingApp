@@ -105,7 +105,6 @@ public class ProductController {
     public DataResponse modifyProductById(@Valid @RequestBody ProductRequest productRequest,
                                           @PathVariable Long productId,
                                           BindingResult bindingResult) {
-        // TODO: check whether those options are optional?
         if (bindingResult.hasErrors()) {
             List<FieldError> errors = bindingResult.getFieldErrors();
             return buildErrorContent(errors);
@@ -125,6 +124,28 @@ public class ProductController {
                 .build();
     }
 
+    @GetMapping("/popular/{count}")
+    @PreAuthorize("hasAuthority('Admin')")
+    public DataResponse getMostPopularProducts(@PathVariable Integer count){
+        List<Product> result = productService.getTopKFrequentProductsByUserId(null, count);
+        return DataResponse.builder()
+                .data(result)
+                .success(true)
+                .message("Got " + count + " most popular products")
+                .build();
+    }
+
+    @GetMapping("/profit/{count}")
+    @PreAuthorize("hasAuthority('Admin')")
+    public DataResponse getMostProfitableProducts(@PathVariable Integer count){
+        List<Product> result = productService.getTopKProfitableProducts(count);
+        return DataResponse.builder()
+                .data(result)
+                .success(true)
+                .message("Got " + count + " most popular products")
+                .build();
+    }
+
     @GetMapping("/frequent/{count}")
     @PreAuthorize("hasAuthority('Buyer')")
     public DataResponse getMostFrequentProducts(@PathVariable Integer count) {
@@ -139,7 +160,9 @@ public class ProductController {
                 .build();
     }
 
+
     @GetMapping("/recent/{count}")
+    @PreAuthorize("hasAuthority('Buyer')")
     public DataResponse getMostRecentProducts(@PathVariable Integer count){
         String userIdStr = SecurityContextHolder.getContext()
                 .getAuthentication().getName();

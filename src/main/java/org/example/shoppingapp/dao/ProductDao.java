@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -60,6 +61,7 @@ public class ProductDao extends AbstractHibernateDao<Product>{
         currentSession.update(product);
     }
 
+
     public List<Product> getTopKFrequentProductByUserId(Long userId, int k){
         Session currentSession = getCurrentSession();
         CriteriaBuilder criteriaBuilder = currentSession.getCriteriaBuilder();
@@ -68,11 +70,16 @@ public class ProductDao extends AbstractHibernateDao<Product>{
         Join<OrderItem, Product> productJoin = root.join("product", JoinType.INNER);
         Join<OrderItem, Order> orderJoin = root.join("order", JoinType.INNER);
 
-        Predicate userPredicate = orderJoin.get("user").get("id").in(userId);
+        Predicate userPredicate = criteriaBuilder.and();
+        if(userId != null){
+            userPredicate = orderJoin.get("user").get("id").in(userId);
+        }
+        Predicate orderPredicate = orderJoin.get("orderStatus").in(
+                Arrays.asList("Processing", "Completed"));
         criteriaQuery.select(productJoin)
                 .groupBy(productJoin)
                 .orderBy(criteriaBuilder.desc(criteriaBuilder.count(root)))
-                .where(userPredicate);
+                .where(criteriaBuilder.and(userPredicate, orderPredicate));
         return currentSession.createQuery(criteriaQuery)
                 .setMaxResults(k)
                 .getResultList();
@@ -88,16 +95,32 @@ public class ProductDao extends AbstractHibernateDao<Product>{
         Join<Order, OrderItem> orderItemJoin = orderRoot.join("orderItemSet");
         Join<OrderItem, Product> productJoin = orderItemJoin.join("product");
         Predicate userPredicate = orderRoot.get("user").get("id").in(userId);
+        Predicate orderPredicate = orderRoot.get("orderStatus").in(
+                Arrays.asList("Processing", "Completed"));
         criteriaQuery.multiselect(productJoin, criteriaBuilder.max(orderRoot.get("datePlaced")))
                 .groupBy(productJoin)
                 .orderBy(criteriaBuilder.desc(criteriaBuilder.max(orderRoot.get("datePlaced"))))
-                .where(userPredicate);
+                .where(criteriaBuilder.and(userPredicate, orderPredicate));
 
         TypedQuery<Object[]> query = currentSession.createQuery(criteriaQuery)
-                .setMaxResults(3);
+                .setMaxResults(k);
 
         return query.getResultList().stream()
                 .map(r -> (Product)r[0])
                 .collect(Collectors.toList());
+    }
+
+    public List<Product> getTopKProfitableProducts(int topK){
+        Session currentSession = this.getCurrentSession();
+        String queryString = "select  p " +
+                "from OrderItem oi join oi.product p " +
+                "join oi.order o " +
+                "where o.orderStatus <> 'canceled' " +
+                "group by p " +
+                "order by sum(oi.purchasedPrice - oi.wholesalePrice) desc ";
+        List<Product> result = currentSession.createQuery(queryString, Product.class)
+                .setMaxResults(topK)
+                .getResultList();
+        return result;
     }
 }
