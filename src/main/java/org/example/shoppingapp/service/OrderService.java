@@ -8,6 +8,7 @@ import org.example.shoppingapp.dao.UserDao;
 import org.example.shoppingapp.domain.Order;
 import org.example.shoppingapp.domain.OrderItem;
 import org.example.shoppingapp.domain.OrderItemDetail;
+import org.example.shoppingapp.domain.Product;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -62,4 +63,14 @@ public class OrderService {
         }
         orderDao.updateOrderStatusById(orderId, "Canceled");
     }
+
+    @Transactional
+    public void completeOrderById(Long orderId){
+        orderDao.updateOrderStatusById(orderId, "Completed");
+    }
+
+//    @Transactional
+//    public List<Product> getTopKFrequentProductsByUserId(Long userId, int topK){
+//        List<Order> = orderDao.getOrdersByUserId(userId);
+//    }
 }

@@ -32,6 +32,10 @@ public class Product {
     @Column(name="wholesale_price")
     private Double wholesalePrice;
 
+    @OneToMany(mappedBy = "product")
+    @JsonIgnore
+    private Set<OrderItem> orderItems;
+
     @JsonIgnore
     @ManyToMany(mappedBy = "watchlistProducts", fetch = FetchType.EAGER)
     private Set<User> users; //= new HashSet<User>();

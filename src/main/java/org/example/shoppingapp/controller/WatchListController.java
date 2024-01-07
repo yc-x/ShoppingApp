@@ -5,6 +5,8 @@ import org.example.shoppingapp.domain.Product;
 import org.example.shoppingapp.dto.common.DataResponse;
 import org.example.shoppingapp.service.ProductService;
 import org.example.shoppingapp.service.UserService;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,10 +20,18 @@ public class WatchListController {
     private final UserService userService;
     private final ProductService productService;
 
+    private Set<String> getAuthUserAuthorities(){
+        return  SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toSet());
+    }
     @GetMapping("/products/all")
     public DataResponse getAllWatchList(){
         // TODO: fetch from real user id;
-        Long userId = 2L;
+        Long userId = Long.valueOf(SecurityContextHolder.getContext()
+                .getAuthentication().getName());
         Set<Product> productWatchlist = userService.getWatchlistProductsByUserId(userId);
         return DataResponse.builder()
                 .data(productWatchlist)
@@ -39,9 +49,8 @@ public class WatchListController {
                     .message("Product you want to add doesn't exist!")
                     .build();
         }
-        //TODO: change user id to current user.
-        Long userId = 2L;
-
+        Long userId = Long.valueOf(SecurityContextHolder.getContext()
+                .getAuthentication().getName());
         userService.addProductToWatchlistByProductIdAndUserId(productId, userId);
         return DataResponse.builder()
                 .success(true)
@@ -51,8 +60,8 @@ public class WatchListController {
 
     @DeleteMapping("/product/{productId}")
     public DataResponse removeFromWatchlist(@PathVariable Long productId){
-        // TODO: replace dummy user to current user
-        Long userId = 2L;
+        Long userId = Long.valueOf(SecurityContextHolder.getContext()
+                .getAuthentication().getName());
         Set<Long> watchlistProductIds = userService.getWatchlistProductsByUserId(userId)
                 .stream()
                 .map(Product::getId)

@@ -33,5 +33,6 @@ public class Order {
     private User user;
 
     @OneToMany(mappedBy = "order")
+    @JsonIgnore
     private Set<OrderItem> orderItemSet;
 }

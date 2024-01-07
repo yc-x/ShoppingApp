@@ -45,7 +45,6 @@ public class OrderController {
     }
 
     @GetMapping("/all")
-//    @PreAuthorize("hasAuthority('Admin')")
     public DataResponse getAllOrders(){
         List<Order> orders;
         if(!getAuthUserAuthorities().contains("Admin")){
@@ -172,6 +171,22 @@ public class OrderController {
                 .build();
     }
 
+    @PatchMapping("/{orderId}/complete")
+    @PreAuthorize("hasAuthority('Admin')")
+    public DataResponse completeOrder(@PathVariable Long orderId) {
+        Order order = orderService.getOrderById(orderId);
+        if(order.getOrderStatus().equals("Processing")){
+            orderService.completeOrderById(orderId);
+            return DataResponse.builder()
+                    .success(true)
+                    .message("The order " + orderId + " has been completed!")
+                    .build();
+        }
+        return DataResponse.builder()
+                .success(false)
+                .message("This order status cannot be changed to completed!")
+                .build();
+    }
 
     private Set<Long> getOrderIdsForCurrentUser(){
         Long currentUserId = Long.valueOf(SecurityContextHolder.getContext()

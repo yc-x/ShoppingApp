@@ -5,6 +5,7 @@ import org.example.shoppingapp.domain.Product;
 import org.example.shoppingapp.dto.common.DataResponse;
 import org.example.shoppingapp.dto.product.ProductRequest;
 import org.example.shoppingapp.dto.product.ProductResponse;
+import org.example.shoppingapp.service.OrderService;
 import org.example.shoppingapp.service.ProductService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.GrantedAuthority;
@@ -23,20 +24,22 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProductController {
     private final ProductService productService;
+    private final OrderService orderService;
 
-    private Set<String> getAuthUserAuthorities(){
-        return  SecurityContextHolder.getContext()
+    private Set<String> getAuthUserAuthorities() {
+        return SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toSet());
     }
+
     @PostMapping("")
     @ResponseBody
     @PreAuthorize("hasAuthority('Admin')")
     public DataResponse createProduct(@Valid @RequestBody ProductRequest productRequest,
-                                      BindingResult bindingResult){
-        if(bindingResult.hasErrors()){
+                                      BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
             List<FieldError> errors = bindingResult.getFieldErrors();
             return buildErrorContent(errors);
         }
@@ -56,8 +59,8 @@ public class ProductController {
 
     @GetMapping("/all")
     @ResponseBody
-    public DataResponse getAllProducts(){
-        if(getAuthUserAuthorities().contains("Admin")){
+    public DataResponse getAllProducts() {
+        if (getAuthUserAuthorities().contains("Admin")) {
             return getAllProductsForAdmin();
         }
         return getAllProductsForBuyer();
@@ -65,11 +68,11 @@ public class ProductController {
 
     @GetMapping("/{productId}")
     @ResponseBody
-    public DataResponse getProductById(@PathVariable long productId){
+    public DataResponse getProductById(@PathVariable long productId) {
         Product product = productService.getProductById(productId);
-        if(product != null){
-            if(product.getQuantity() == 0 &&
-                    !getAuthUserAuthorities().contains("Admin")){
+        if (product != null) {
+            if (product.getQuantity() == 0 &&
+                    !getAuthUserAuthorities().contains("Admin")) {
                 return DataResponse.builder()
                         .message("The product you are searching is out of stock!")
                         .success(true)
@@ -81,7 +84,7 @@ public class ProductController {
                     .retailPrice(product.getRetailPrice())
                     .wholesalePrice(product.getWholesalePrice())
                     .build();
-            if(getAuthUserAuthorities().contains("Admin")){
+            if (getAuthUserAuthorities().contains("Admin")) {
                 productResponse.setQuantity(product.getQuantity());
             }
             return DataResponse.builder()
@@ -100,15 +103,15 @@ public class ProductController {
     @ResponseBody
     @PreAuthorize("hasAuthority('Admin')")
     public DataResponse modifyProductById(@Valid @RequestBody ProductRequest productRequest,
-    @PathVariable Long productId,
-    BindingResult bindingResult){
+                                          @PathVariable Long productId,
+                                          BindingResult bindingResult) {
         // TODO: check whether those options are optional?
-        if(bindingResult.hasErrors()){
+        if (bindingResult.hasErrors()) {
             List<FieldError> errors = bindingResult.getFieldErrors();
             return buildErrorContent(errors);
         }
         Product product = productService.getProductById(productId);
-        if(product == null){
+        if (product == null) {
             return DataResponse.builder()
                     .success(false)
                     .message("The product id doesn't exist!")
@@ -121,6 +124,34 @@ public class ProductController {
                 .data(productService.getProductById(productId))
                 .build();
     }
+
+    @GetMapping("/frequent/{count}")
+    @PreAuthorize("hasAuthority('Buyer')")
+    public DataResponse getMostFrequentProducts(@PathVariable Integer count) {
+        String userIdStr = SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        Long userId = Long.valueOf(userIdStr);
+        List<Product> result = productService.getTopKFrequentProductsByUserId(userId, count);
+        return DataResponse.builder()
+                .data(result)
+                .success(true)
+                .message("Got " + count + " most frequent products")
+                .build();
+    }
+
+    @GetMapping("/recent/{count}")
+    public DataResponse getMostRecentProducts(@PathVariable Integer count){
+        String userIdStr = SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        Long userId = Long.valueOf(userIdStr);
+        List<Product> result = productService.getTopKRecentProductsByUserId(userId, count);
+        return DataResponse.builder()
+                .data(result)
+                .success(true)
+                .message("Got " + count + " most recent products")
+                .build();
+    }
+
 
     private DataResponse getAllProductsForBuyer(){
         List<ProductResponse> responseList = productService.getAllProducts().stream()
