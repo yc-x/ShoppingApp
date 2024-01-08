@@ -157,7 +157,7 @@ public class OrderController {
     @PatchMapping("/{orderId}/cancel")
     public DataResponse cancelOrder(@PathVariable Long orderId){
         Set<Long> orderIdSet = getOrderIdsForCurrentUser();
-        if(!orderIdSet.contains(orderId)){
+        if(!getAuthUserAuthorities().contains("Admin") && !orderIdSet.contains(orderId)){
             return DataResponse.builder()
                     .success(false)
                     .message("This order is not placed by you!")
