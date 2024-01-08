@@ -22,6 +22,7 @@ public class JwtProvider {
 
     // resolves the token -> use the information in the token to create a userDetail object
     public Optional<AuthUserDetail> resolveToken(HttpServletRequest request){
+        // TODO: [URGENT] handle the breaking problem of request with no token present.
         String prefixedToken = request.getHeader("Authorization"); // extract token value by key "Authorization"
         String token = prefixedToken.substring(7); // remove the prefix "Bearer "
 
