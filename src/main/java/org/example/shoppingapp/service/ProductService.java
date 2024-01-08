@@ -54,4 +54,9 @@ public class ProductService {
     public List<Product> getTopKProfitableProducts(int topK){
         return productDao.getTopKProfitableProducts(topK);
     }
+
+    @Transactional
+    public List<Object[]> getTotalProductSold(){
+        return productDao.getTotalProductSold();
+    }
 }

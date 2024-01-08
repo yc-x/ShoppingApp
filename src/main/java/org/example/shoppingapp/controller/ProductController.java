@@ -66,6 +66,14 @@ public class ProductController {
         return getAllProductsForBuyer();
     }
 
+    @GetMapping("/sold")
+    @PreAuthorize("hasAuthority('Admin')")
+    public DataResponse getTotalProductSold(){
+        return DataResponse.builder()
+                .success(true)
+                .data(productService.getTotalProductSold())
+                .build();
+    }
     @GetMapping("/{productId}")
     @ResponseBody
     public DataResponse getProductById(@PathVariable long productId) {

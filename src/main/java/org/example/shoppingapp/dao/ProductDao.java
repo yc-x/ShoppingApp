@@ -123,4 +123,17 @@ public class ProductDao extends AbstractHibernateDao<Product>{
                 .getResultList();
         return result;
     }
+
+    public List<Object[]> getTotalProductSold(){
+        //TODO: Change to a product + sold number class to response.
+        Session currentSession = this.getCurrentSession();
+        String queryString = "select p, sum(oi.quantity) " +
+                "from OrderItem oi join oi.product p " +
+                "join oi.order o " +
+                "where o.orderStatus = 'Completed' " +
+                "group by p ";
+        List<Object[]> result = currentSession.createQuery(queryString, Object[].class)
+                .getResultList();
+        return result;
+    }
 }
