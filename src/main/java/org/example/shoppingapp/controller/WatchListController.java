@@ -59,6 +59,15 @@ public class WatchListController {
         }
         Long userId = Long.valueOf(SecurityContextHolder.getContext()
                 .getAuthentication().getName());
+        boolean isExist = userService.getWatchlistProductsByUserId(userId).stream()
+                        .map(Product::getId)
+                .anyMatch(pid ->pid == p.getId());
+        if(isExist){
+            return DataResponse.builder()
+                    .success(false)
+                    .message("Product you want to add is already in list!")
+                    .build();
+        }
         userService.addProductToWatchlistByProductIdAndUserId(productId, userId);
         return DataResponse.builder()
                 .success(true)
