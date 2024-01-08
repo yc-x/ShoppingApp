@@ -23,5 +23,5 @@ public class UserRequest {
 
     @NotNull(message = "password cannot be null")
     @NotBlank(message = "password cannot be blank")
-    private String password;    // TODO: create encrypted password
+    private String password;
 }

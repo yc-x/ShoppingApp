@@ -30,7 +30,6 @@ public class WatchListController {
     }
     @GetMapping("/products/all")
     public DataResponse getAllWatchList(){
-        // TODO: fetch from real user id;
         Long userId = Long.valueOf(SecurityContextHolder.getContext()
                 .getAuthentication().getName());
         List<ProductResponse> productWatchlist = userService.getWatchlistProductsByUserId(userId)
