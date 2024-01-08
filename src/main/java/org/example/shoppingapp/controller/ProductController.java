@@ -152,7 +152,16 @@ public class ProductController {
         String userIdStr = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
         Long userId = Long.valueOf(userIdStr);
-        List<Product> result = productService.getTopKFrequentProductsByUserId(userId, count);
+        List<ProductResponse> result = productService.getTopKFrequentProductsByUserId(userId, count)
+                .stream().map(
+                    p -> ProductResponse.builder()
+                            .name(p.getName())
+                            .description(p.getDescription())
+                            .retailPrice(p.getRetailPrice())
+                            .wholesalePrice(p.getWholesalePrice())
+                            .build()
+                )
+                .collect(Collectors.toList());
         return DataResponse.builder()
                 .data(result)
                 .success(true)
@@ -167,7 +176,15 @@ public class ProductController {
         String userIdStr = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
         Long userId = Long.valueOf(userIdStr);
-        List<Product> result = productService.getTopKRecentProductsByUserId(userId, count);
+        List<ProductResponse> result = productService.getTopKRecentProductsByUserId(userId, count)
+                .stream().map(p -> ProductResponse.builder()
+                        .name(p.getName())
+                        .description(p.getDescription())
+                        .retailPrice(p.getRetailPrice())
+                        .wholesalePrice(p.getWholesalePrice())
+                        .build()
+                )
+                .collect(Collectors.toList());
         return DataResponse.builder()
                 .data(result)
                 .success(true)

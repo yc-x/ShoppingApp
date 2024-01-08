@@ -3,6 +3,7 @@ package org.example.shoppingapp.controller;
 import lombok.RequiredArgsConstructor;
 import org.example.shoppingapp.domain.Product;
 import org.example.shoppingapp.dto.common.DataResponse;
+import org.example.shoppingapp.dto.product.ProductResponse;
 import org.example.shoppingapp.service.ProductService;
 import org.example.shoppingapp.service.UserService;
 import org.springframework.security.core.GrantedAuthority;
@@ -32,7 +33,15 @@ public class WatchListController {
         // TODO: fetch from real user id;
         Long userId = Long.valueOf(SecurityContextHolder.getContext()
                 .getAuthentication().getName());
-        Set<Product> productWatchlist = userService.getWatchlistProductsByUserId(userId);
+        List<ProductResponse> productWatchlist = userService.getWatchlistProductsByUserId(userId)
+                .stream().map(p -> ProductResponse.builder()
+                        .name(p.getName())
+                        .description(p.getDescription())
+                        .retailPrice(p.getRetailPrice())
+                        .wholesalePrice(p.getWholesalePrice())
+                        .build()
+                )
+                .collect(Collectors.toList());
         return DataResponse.builder()
                 .data(productWatchlist)
                 .success(true)
