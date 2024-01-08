@@ -115,7 +115,7 @@ public class ProductDao extends AbstractHibernateDao<Product>{
         String queryString = "select  p " +
                 "from OrderItem oi join oi.product p " +
                 "join oi.order o " +
-                "where o.orderStatus <> 'canceled' " +
+                "where o.orderStatus = 'Completed' " +
                 "group by p " +
                 "order by sum(oi.purchasedPrice - oi.wholesalePrice) desc ";
         List<Product> result = currentSession.createQuery(queryString, Product.class)
