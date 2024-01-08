@@ -18,6 +18,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 public class UserController {
+    //TODO: Registered for potential user management.
 //    private final UserService userService;
 //
 //
