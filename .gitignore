@@ -32,8 +32,8 @@ build/
 ### VS Code ###
 .vscode/
 
-#### properties file ###
-#*.properties
+### properties file ###
+application.properties
 
 ### OS Generated files ###
 .DS_Store
