@@ -2,6 +2,7 @@ package org.example.shoppingapp.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -23,6 +24,7 @@ public class JwtProvider {
     // resolves the token -> use the information in the token to create a userDetail object
     public Optional<AuthUserDetail> resolveToken(HttpServletRequest request){
         // TODO: [URGENT] handle the breaking problem of request with no token present.
+        // TODO: Add a expire time check for token validation.
         String prefixedToken = request.getHeader("Authorization"); // extract token value by key "Authorization"
         String token = prefixedToken.substring(7); // remove the prefix "Bearer "
 

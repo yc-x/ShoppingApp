@@ -1,5 +1,7 @@
 package org.example.shoppingapp.security;
 
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,20 +28,23 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        Optional<AuthUserDetail> authUserDetailOptional = jwtProvider.resolveToken(request); // extract jwt from request, generate a userdetails object
+        try{
+            Optional<AuthUserDetail> authUserDetailOptional = jwtProvider.resolveToken(request); // extract jwt from request, generate a userdetails object
 
-        if (authUserDetailOptional.isPresent()){
-            AuthUserDetail authUserDetail = authUserDetailOptional.get();
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    authUserDetail.getUsername(),
-                    null,
-                    authUserDetail.getAuthorities()
-            ); // generate authentication object
+            if (authUserDetailOptional.isPresent()){
+                AuthUserDetail authUserDetail = authUserDetailOptional.get();
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                        authUserDetail.getUsername(),
+                        null,
+                        authUserDetail.getAuthorities()
+                ); // generate authentication object
 
-            SecurityContextHolder.getContext().setAuthentication(authentication); // put authentication object in the secruitycontext
+                SecurityContextHolder.getContext().setAuthentication(authentication); // put authentication object in the secruitycontext
+            }
+            filterChain.doFilter(request, response);
         }
-
-        filterChain.doFilter(request, response);
-
+        catch(SignatureException | NullPointerException | MalformedJwtException e){
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication failed: " + e.getMessage());
+        }
     }
 }
