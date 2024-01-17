@@ -15,4 +15,9 @@ public class ProductResponse {
     private Double retailPrice;
     private Double wholesalePrice;
     private Integer quantity;
+    private Long id;
+
+    private Integer soldQuantity;
+    //TODO: implement a static method to build this response and replace duplicate code,
+    // or just remove this object.
 }

@@ -34,10 +34,10 @@ public class WatchListController {
                 .getAuthentication().getName());
         List<ProductResponse> productWatchlist = userService.getWatchlistProductsByUserId(userId)
                 .stream().map(p -> ProductResponse.builder()
+                        .id(p.getId())
                         .name(p.getName())
                         .description(p.getDescription())
                         .retailPrice(p.getRetailPrice())
-                        .wholesalePrice(p.getWholesalePrice())
                         .build()
                 )
                 .collect(Collectors.toList());

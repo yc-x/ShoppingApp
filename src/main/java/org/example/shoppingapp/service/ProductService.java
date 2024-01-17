@@ -6,10 +6,12 @@ import org.example.shoppingapp.dao.OrderItemDao;
 import org.example.shoppingapp.dao.ProductDao;
 import org.example.shoppingapp.domain.Product;
 import org.example.shoppingapp.dto.product.ProductRequest;
+import org.example.shoppingapp.dto.product.ProductResponse;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -56,7 +58,22 @@ public class ProductService {
     }
 
     @Transactional
-    public List<Object[]> getTotalProductSold(){
-        return productDao.getTotalProductSold();
+    public List<ProductResponse> getTotalProductSold(){
+        return productDao.getTotalProductSold().stream()
+                .map(objects -> {
+                    Product p = (Product) objects[0];
+                    // TODO: fix this force type-casting issue.
+                    String soldQuantityStr = String.valueOf(objects[1]);
+                    return ProductResponse.builder()
+                            .id(p.getId())
+                            .description(p.getDescription())
+                            .name(p.getName())
+                            .retailPrice(p.getRetailPrice())
+                            .wholesalePrice(p.getWholesalePrice())
+                            .quantity(p.getQuantity())
+                            .soldQuantity(Integer.valueOf(soldQuantityStr))
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 }

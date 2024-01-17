@@ -133,10 +133,6 @@ public class OrderController {
             throw new NotEnoughInventoryException(
                     "One of the items in your order stocking is not enough!"
             );
-//            return DataResponse.builder()
-//                    .success(false)
-//                    .message("One of the items in your order stocking is not enough!")
-//                    .build();
         }
         Order newOrder = Order.builder()
                 .datePlaced(Timestamp.valueOf(LocalDateTime.now()))

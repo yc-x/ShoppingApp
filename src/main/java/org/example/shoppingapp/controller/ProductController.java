@@ -83,17 +83,18 @@ public class ProductController {
                     !getAuthUserAuthorities().contains("Admin")) {
                 return DataResponse.builder()
                         .message("The product you are searching is out of stock!")
-                        .success(true)
+                        .success(false)
                         .build();
             }
             ProductResponse productResponse = ProductResponse.builder()
+                    .id(product.getId())
                     .name(product.getName())
                     .description(product.getDescription())
                     .retailPrice(product.getRetailPrice())
-                    .wholesalePrice(product.getWholesalePrice())
                     .build();
             if (getAuthUserAuthorities().contains("Admin")) {
                 productResponse.setQuantity(product.getQuantity());
+                productResponse.setWholesalePrice(product.getWholesalePrice());
             }
             return DataResponse.builder()
                     .data(productResponse)
@@ -163,6 +164,7 @@ public class ProductController {
         List<ProductResponse> result = productService.getTopKFrequentProductsByUserId(userId, count)
                 .stream().map(
                     p -> ProductResponse.builder()
+                            .id(p.getId())
                             .name(p.getName())
                             .description(p.getDescription())
                             .retailPrice(p.getRetailPrice())
@@ -186,6 +188,7 @@ public class ProductController {
         Long userId = Long.valueOf(userIdStr);
         List<ProductResponse> result = productService.getTopKRecentProductsByUserId(userId, count)
                 .stream().map(p -> ProductResponse.builder()
+                        .id(p.getId())
                         .name(p.getName())
                         .description(p.getDescription())
                         .retailPrice(p.getRetailPrice())
@@ -205,10 +208,10 @@ public class ProductController {
         List<ProductResponse> responseList = productService.getAllProducts().stream()
                 .filter(p -> p.getQuantity() > 0)
                 .map(p -> ProductResponse.builder()
+                        .id(p.getId())
                         .name(p.getName())
                         .description(p.getDescription())
                         .retailPrice(p.getRetailPrice())
-                        .wholesalePrice(p.getWholesalePrice())
                         .build()
                 ).collect(Collectors.toList());
         return DataResponse.builder()
@@ -221,6 +224,7 @@ public class ProductController {
     private DataResponse getAllProductsForAdmin(){
         List<ProductResponse> responseList = productService.getAllProducts().stream()
                 .map(p -> ProductResponse.builder()
+                        .id(p.getId())
                         .name(p.getName())
                         .description(p.getDescription())
                         .quantity(p.getQuantity())
