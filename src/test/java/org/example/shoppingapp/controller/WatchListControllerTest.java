@@ -28,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class WatchListControllerTest {
+    // TODO: Replace this wrong testing with correct way using MockMVC
     @InjectMocks
     private WatchListController watchListController;
     @Mock
